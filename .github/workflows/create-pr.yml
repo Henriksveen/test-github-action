@@ -1,4 +1,4 @@
-name: Create Pull Request to Current Branch
+name: Create, Auto-Merge Pull Request
 
 on:
   workflow_dispatch:
@@ -7,6 +7,11 @@ on:
         description: 'Commit message'
         required: true
         default: 'Update files'
+      auto_merge:
+        description: 'Auto-merge the PR'
+        type: boolean
+        required: true
+        default: true
 
 # Note: For this workflow to create pull requests, you need to either:
 # 1. Use a Personal Access Token (PAT) with repo scope instead of GITHUB_TOKEN
@@ -40,6 +45,7 @@ jobs:
           commit-message: ${{ github.event.inputs.commit_message }}
           branch: "auto-updates-${{ github.run_id }}"
           base: ${{ github.ref_name }}
+          # This ensures the branch is deleted after the PR is merged or closed
           delete-branch: true
           title: "Automated PR: ${{ github.event.inputs.commit_message }}"
           body: |
@@ -61,3 +67,16 @@ jobs:
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+          
+      - name: Auto-approve PR
+        if: ${{ github.event.inputs.auto_merge == 'true' && steps.cpr.outputs.pull-request-number }}
+        uses: hmarr/auto-approve-action@v3
+        with:
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          
+      - name: Enable auto-merge
+        if: ${{ github.event.inputs.auto_merge == 'true' && steps.cpr.outputs.pull-request-number }}
+        run: |
+          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
