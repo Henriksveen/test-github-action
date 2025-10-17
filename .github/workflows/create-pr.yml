@@ -49,8 +49,7 @@ jobs:
           commit-message: ${{ github.event.inputs.commit_message }}
           branch: "auto-updates-${{ github.run_id }}"
           base: ${{ github.ref_name }}
-          # This ensures the branch is deleted after the PR is merged or closed
-          delete-branch: true
+
           title: "Automated PR: ${{ github.event.inputs.commit_message }}"
           body: |
             ## Automated Pull Request

@@ -39,7 +39,7 @@ jobs:
         with:
           commit-message: ${{ github.event.inputs.message }}
           branch: ${{ github.event.inputs.branch-name }}
-          delete-branch: true
+
           title: ${{ github.event.inputs.message }}
           body: |
             This PR was automatically created via the Update Data workflow.
