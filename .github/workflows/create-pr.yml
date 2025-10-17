@@ -8,6 +8,10 @@ on:
         required: true
         default: 'Update files'
 
+# Note: For this workflow to create pull requests, you need to either:
+# 1. Use a Personal Access Token (PAT) with repo scope instead of GITHUB_TOKEN
+# 2. Enable "Allow GitHub Actions to create and approve pull requests" in repository settings
+#    (Settings > Actions > General > Workflow permissions)
 permissions:
   contents: write
   pull-requests: write
@@ -30,6 +34,9 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
+          # Using GITHUB_TOKEN by default, but you may need to use a PAT
+          # if repository settings don't allow GitHub Actions to create PRs
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: ${{ github.event.inputs.commit_message }}
           branch: "auto-updates-${{ github.run_id }}"
           base: ${{ github.ref_name }}
