@@ -1,0 +1,57 @@
+name: Update Data
+
+# Workflow triggered manually via GitHub UI or API
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: 'Commit message'
+        required: true
+        default: 'Update data files'
+      branch-name:
+        description: 'Branch name for the PR'
+        required: true
+        default: 'update-data'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Here you would typically add steps that make changes to your files
+      # For example, this could be updating data, running a script, etc.
+      - name: Make changes to files
+        run: |
+          # This is a placeholder for your actual data updating logic
+          echo "Last updated: $(date)" > data.txt
+          echo "Random value: $RANDOM" >> data.txt
+
+      # Create a pull request with the changes
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: ${{ github.event.inputs.message }}
+          branch: ${{ github.event.inputs.branch-name }}
+          delete-branch: true
+          title: ${{ github.event.inputs.message }}
+          body: |
+            This PR was automatically created via the Update Data workflow.
+            
+            It updates our data files with the latest information.
+          labels: |
+            automated-pr
+            data-update
+
+      # Output PR info
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"

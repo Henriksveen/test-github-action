@@ -1,0 +1,59 @@
+name: Create Pull Request on Dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_message:
+        description: 'Commit message'
+        required: true
+        default: 'Update files'
+      branch_name:
+        description: 'Branch name'
+        required: true
+        default: 'auto-update-branch'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Create or update sample file
+        run: |
+          # Create a timestamp file for demonstration
+          echo "Last updated: $(date)" > sample-file.txt
+          echo "This is a sample file created by the GitHub Action workflow." >> sample-file.txt
+          echo "Random number: $RANDOM" >> sample-file.txt
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: ${{ github.event.inputs.commit_message }}
+          branch: ${{ github.event.inputs.branch_name }}
+          delete-branch: true
+          title: "Automated PR: ${{ github.event.inputs.commit_message }}"
+          body: |
+            ## Automated Pull Request
+            
+            This pull request was automatically created by the GitHub Action workflow.
+            
+            Changes:
+            - Created/Updated sample-file.txt with current timestamp
+            - Added random data for testing purposes
+            
+            The workflow can be manually triggered from the Actions tab.
+          labels: |
+            automated-pr
+            test
+
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
