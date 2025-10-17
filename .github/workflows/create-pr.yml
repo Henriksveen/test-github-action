@@ -1,4 +1,4 @@
-name: Create Pull Request on Dispatch
+name: Create Pull Request to Current Branch
 
 on:
   workflow_dispatch:
@@ -7,10 +7,6 @@ on:
         description: 'Commit message'
         required: true
         default: 'Update files'
-      branch_name:
-        description: 'Branch name'
-        required: true
-        default: 'auto-update-branch'
 
 permissions:
   contents: write
@@ -35,13 +31,14 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           commit-message: ${{ github.event.inputs.commit_message }}
-          branch: ${{ github.event.inputs.branch_name }}
+          branch: "auto-updates-${{ github.run_id }}"
+          base: ${{ github.ref_name }}
           delete-branch: true
           title: "Automated PR: ${{ github.event.inputs.commit_message }}"
           body: |
             ## Automated Pull Request
             
-            This pull request was automatically created by the GitHub Action workflow.
+            This pull request was automatically created by the GitHub Action workflow to merge changes back into the `${{ github.ref_name }}` branch.
             
             Changes:
             - Created/Updated sample-file.txt with current timestamp
